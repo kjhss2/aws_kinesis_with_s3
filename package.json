@@ -1,0 +1,17 @@
+{
+  "name": "de-statistics-log-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "wonder-people",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-kinesis": "^3.637.0",
+    "@aws-sdk/client-s3": "^3.637.0",
+    "dotenv": "^16.4.5",
+    "mysql2": "^3.11.0"
+  }
+}
