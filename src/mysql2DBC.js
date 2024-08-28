@@ -43,6 +43,18 @@ class MySQL2DBC {
     }
   }
 
+  async getDataById(id, table_name = "DE_SERVER_ACTION") {
+    const dataModel = new DataModel(this.pool, table_name);
+
+    try {
+      // get a find data by id
+      const data = await dataModel.findDataById(id);
+      console.log('@getData', data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
   // Method to execute queries
   async query(sql, params) {
     try {
@@ -58,6 +70,7 @@ class MySQL2DBC {
   async close() {
     try {
       await this.pool.end();
+      database = null;
       console.log('@pool close');
     } catch (error) {
       console.error('Error closing the database connection:', error);

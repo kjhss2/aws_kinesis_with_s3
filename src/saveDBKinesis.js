@@ -5,14 +5,19 @@ const { MySQL2DBC } = require("./mysql2DBC");
 let s3Client = null;
 class SaveDBKinesis {
   constructor() {
+    if (s3Client) {
+      return s3Client;
+    }
+
     // S3 Client
-    s3Client = new S3Client({
+    this.instanse = new S3Client({
       region: process.env.KINESIS__REGION,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       }
     });
+    s3Client = this;
   }
 
   async listObjects(bucket) {
@@ -23,7 +28,7 @@ class SaveDBKinesis {
     const command = new ListObjectsV2Command(params);
 
     try {
-      const data = await s3Client.send(command);
+      const data = await this.instanse.send(command);
       return data.Contents || [];
     } catch (error) {
       console.error("Error listing objects:", error);
@@ -40,7 +45,7 @@ class SaveDBKinesis {
     const command = new GetObjectCommand(params);
 
     try {
-      const response = await s3Client.send(command);
+      const response = await this.instanse.send(command);
       const streamToString = (stream) =>
         new Promise((resolve, reject) => {
           const chunks = [];
@@ -57,39 +62,25 @@ class SaveDBKinesis {
     }
   }
 
-  async processAllObjects() {
+  async processAllObjects(databaseClient) {
+    const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
+    const objects = await this.listObjects(bucketName);
 
-    let databaseClient;
+    // 어제 날짜의 데이터만 조회
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const eveDate = `${yesterday.getFullYear()}/${leftPad(yesterday.getMonth() + 1)}/${yesterday.getDate()}`;
 
-    try {
+    for (const object of objects) {
+      const key = object.Key;
+      if (key && key.includes(eveDate)) {
+        const objectData = await this.getObject(bucketName, key);
+        const rowDatas = objectData.split("\n");
 
-      const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
-      const objects = await this.listObjects(bucketName);
-      databaseClient = new MySQL2DBC();
-
-      // 어제 날짜의 데이터만 조회
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const eveDate = `${yesterday.getFullYear()}/${leftPad(yesterday.getMonth() + 1)}/${yesterday.getDate()}`;
-
-      for (const object of objects) {
-        const key = object.Key;
-        if (key && key.includes(eveDate)) {
-          const objectData = await this.getObject(bucketName, key);
-          const rowDatas = objectData.split("\n");
-
-          for (const rowData of rowDatas) {
-            const { actionToken, ...data } = JSON.parse(rowData);
-            databaseClient.insertData(actionToken, data);
-          }
+        for (const rowData of rowDatas) {
+          const { actionToken, ...data } = JSON.parse(rowData);
+          databaseClient.insertData(actionToken, data);
         }
-      }
-
-    } catch (error) {
-      console.error(error);
-    } finally {
-      if (databaseClient) {
-        databaseClient.close();
       }
     }
   };

@@ -8,13 +8,14 @@ class KinesisClientClass {
     }
 
     // Kinesis Client
-    kinesisInstance = new KinesisClient({
+    this.instance = new KinesisClient({
       region: process.env.KINESIS__REGION,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       }
     });
+    kinesisInstance = this;
   }
 
   // Kinesis Put
@@ -26,7 +27,7 @@ class KinesisClientClass {
         PartitionKey: msgData.actionToken,
         Data: Buffer.from(record),
       };
-      const data = await kinesisInstance.send(new PutRecordCommand(recordParams));
+      const data = await this.instance.send(new PutRecordCommand(recordParams));
       console.log("Successfully sent record to Kinesis:");
     } catch (err) {
       console.error("Error sending record to Kinesis:", err);
