@@ -1,6 +1,5 @@
 const { S3Client, GetObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
-const { leftPad } = require("./commonFunction");
-const { MySQL2DBC } = require("./mysql2DBC");
+const { leftPadMonth } = require("./commonFunction");
 
 let s3Client = null;
 class SaveDBKinesis {
@@ -69,7 +68,7 @@ class SaveDBKinesis {
     // 어제 날짜의 데이터만 조회
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const eveDate = `${yesterday.getFullYear()}/${leftPad(yesterday.getMonth() + 1)}/${yesterday.getDate()}`;
+    const eveDate = `${yesterday.getFullYear()}/${leftPadMonth(yesterday.getMonth() + 1)}/${yesterday.getDate()}`;
 
     for (const object of objects) {
       const key = object.Key;
