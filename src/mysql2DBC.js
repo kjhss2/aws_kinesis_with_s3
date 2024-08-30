@@ -100,9 +100,19 @@ class DataModel {
 
   // Add a new data
   async insertData(data) {
-    const sql = `INSERT INTO ${this.tableName} (date, type, value) VALUES (?, ?, ?)`;
-    const result = await this.pool.query(sql, [data.date, data.type, data.value]);
-    return result;
+    try {
+      const sql = `INSERT INTO ${this.tableName} (contentType, nowDate, base, msg) VALUES (?, ?, ?, ?)`;
+      const params = [
+        data.contentType,
+        data.nowDate,
+        JSON.stringify(data.base),
+        JSON.stringify(data.msg)
+      ]
+      const result = await this.pool.query(sql, params);
+      return result;
+    } catch (error) {
+      console.error("InsertData Error : ", error);
+    }
   }
 }
 

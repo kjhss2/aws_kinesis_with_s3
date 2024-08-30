@@ -22,9 +22,9 @@ const writeKinesisJob = schedule.scheduleJob('0 0/10 * * * *', function () {
 
   // Test Input Data
   const msgDatas = [
-    { actionToken: "DE_LOGIN_ACTION", date: new Date(), type: 'MSG', value: Math.random() * 100 },
-    { actionToken: "DE_SERVER_ACTION", date: new Date(), type: 'MSG', value: Math.random() * 100 },
-    { actionToken: "DE_DS_ACTION", date: new Date(), type: 'MSG', value: Math.random() * 100 },
+    { tableName: "DE_LOGIN_ACTION", contentType: "LOGIN", nowDate: new Date(), base: '', msg: Math.random() * 100 },
+    { tableName: "DE_SERVER_ACTION", contentType: "SHOP", nowDate: new Date(), base: '', msg: Math.random() * 100 },
+    { tableName: "DE_DS_ACTION", contentType: "RANK", nowDate: new Date(), base: '', msg: Math.random() * 100 },
   ];
 
   msgDatas.forEach(data => {

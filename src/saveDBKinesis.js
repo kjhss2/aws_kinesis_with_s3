@@ -77,8 +77,8 @@ class SaveDBKinesis {
         const rowDatas = objectData.split("\n");
 
         for (const rowData of rowDatas) {
-          const { actionToken, ...data } = JSON.parse(rowData);
-          databaseClient.insertData(actionToken, data);
+          const { tableName, ...data } = JSON.parse(rowData);
+          databaseClient.insertData(tableName, data);
         }
       }
     }

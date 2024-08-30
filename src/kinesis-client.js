@@ -24,7 +24,7 @@ class KinesisClientClass {
       const record = JSON.stringify(msgData);
       const recordParams = {
         StreamName: process.env.KINESIS__STREAM_NAME,
-        PartitionKey: msgData.actionToken,
+        PartitionKey: msgData.contentType,
         Data: Buffer.from(record),
       };
       const data = await this.instance.send(new PutRecordCommand(recordParams));
