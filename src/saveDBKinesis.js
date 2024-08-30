@@ -74,11 +74,14 @@ class SaveDBKinesis {
       const key = object.Key;
       if (key && key.includes(eveDate)) {
         const objectData = await this.getObject(bucketName, key);
-        const rowDatas = objectData.split("\n");
-
-        for (const rowData of rowDatas) {
-          const { tableName, ...data } = JSON.parse(rowData);
-          databaseClient.insertData(tableName, data);
+        if (objectData) {
+          const rowDatas = objectData.split("\n");
+          for (const rowData of rowDatas) {
+            const { tableName, ...data } = JSON.parse(rowData);
+            await databaseClient.insertData(tableName, data);
+          }
+        } else {
+          console.error('@objectData is null');
         }
       }
     }
