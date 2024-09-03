@@ -2,6 +2,7 @@ const { S3Client, GetObjectCommand, ListObjectsV2Command } = require("@aws-sdk/c
 const { leftPadMonth } = require("./commonFunction");
 
 let s3Client = null;
+const saveS3files = [];
 class SaveDBKinesis {
   constructor() {
     if (s3Client) {
@@ -22,6 +23,7 @@ class SaveDBKinesis {
   async listObjects(bucket) {
     const params = {
       Bucket: bucket,
+      Prefix: "logs/",
     };
 
     const command = new ListObjectsV2Command(params);
@@ -63,25 +65,31 @@ class SaveDBKinesis {
 
   async processAllObjects(databaseClient) {
     const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
-    const objects = await this.listObjects(bucketName);
+    const s3Objects = await this.listObjects(bucketName);
 
     // 어제 날짜의 데이터만 조회
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const eveDate = `${yesterday.getFullYear()}/${leftPadMonth(yesterday.getMonth() + 1)}/${yesterday.getDate()}`;
+    const eveDate = `${yesterday.getFullYear()}/${leftPadMonth(yesterday.getMonth() + 1)}/${leftPadMonth(yesterday.getDate())}`;
 
-    for (const object of objects) {
-      const key = object.Key;
+    for (const s3Object of s3Objects) {
+      const key = s3Object.Key;
+
+      // 조건에 맞는 S3 파일인지 체크
       if (key && key.includes(eveDate)) {
-        const objectData = await this.getObject(bucketName, key);
-        if (objectData) {
+
+        // DB에 저장한 S3 파일인지 체크
+        if (saveS3files.includes(key)) {
+          console.log("@이미 저장된 S3파일");
+        } else {
+          const objectData = await this.getObject(bucketName, key);
           const rowDatas = objectData.split("\n");
           for (const rowData of rowDatas) {
-            const { tableName, ...data } = JSON.parse(rowData);
-            await databaseClient.insertData(tableName, data);
+            const data = JSON.parse(rowData);
+            await databaseClient.insertData(data);
           }
-        } else {
-          console.error('@objectData is null');
+          // DB에 저장한 S3 파일 목록 추가
+          saveS3files.push(key);
         }
       }
     }

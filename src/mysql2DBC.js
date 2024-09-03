@@ -19,8 +19,8 @@ class MySQL2DBC {
     database = this;
   }
 
-  async insertData(table_name, data) {
-    const dataModel = new DataModel(this.pool, table_name);
+  async insertData(data) {
+    const dataModel = new DataModel(this.pool, data?.msg?.tableName);
 
     try {
       // Add a new Data
