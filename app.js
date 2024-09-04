@@ -22,9 +22,24 @@ const writeKinesisJob = schedule.scheduleJob('0 0/10 * * * *', function () {
 
   // Test Input Data
   const msgDatas = [
-    { tableName: "DE_LOGIN_ACTION", contentType: "LOGIN", nowDate: new Date(), base: '', msg: Math.random() * 100 },
-    { tableName: "DE_SERVER_ACTION", contentType: "SHOP", nowDate: new Date(), base: '', msg: Math.random() * 100 },
-    { tableName: "DE_DS_ACTION", contentType: "RANK", nowDate: new Date(), base: '', msg: Math.random() * 100 },
+    {
+      contentType: "LOGIN", nowDate: new Date(), base: '', msg: {
+        tableName: "DE_LOGIN_ACTION",
+        value: Math.random() * 100
+      }
+    },
+    {
+      contentType: "SHOP", nowDate: new Date(), base: '', msg: {
+        tableName: "DE_SERVER_ACTION",
+        value: Math.random() * 100
+      }
+    },
+    {
+      contentType: "RANK", nowDate: new Date(), base: '', msg: {
+        tableName: "DE_DS_ACTION",
+        value: Math.random() * 100
+      }
+    },
   ];
 
   msgDatas.forEach(data => {
@@ -38,8 +53,6 @@ const saveMysqlJob = schedule.scheduleJob('0 0 1 * * *', async () => {
 
   try {
     databaseClient = new MySQL2DBC();
-    databaseClient.getDataById(1);
-
     const saveDBKinesis = new SaveDBKinesis();
     await saveDBKinesis.processAllObjects(databaseClient);
   } catch (error) {

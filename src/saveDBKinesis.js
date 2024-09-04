@@ -20,10 +20,10 @@ class SaveDBKinesis {
     s3Client = this;
   }
 
-  async listObjects(bucket) {
+  async listObjects(bucket, prefixDate) {
     const params = {
       Bucket: bucket,
-      Prefix: "logs/",
+      Prefix: "logs/" + prefixDate + "/",
     };
 
     const command = new ListObjectsV2Command(params);
@@ -65,18 +65,17 @@ class SaveDBKinesis {
 
   async processAllObjects(databaseClient) {
     const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
-    const s3Objects = await this.listObjects(bucketName);
-
-    // 어제 날짜의 데이터만 조회
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const eveDate = `${yesterday.getFullYear()}/${leftPadMonth(yesterday.getMonth() + 1)}/${leftPadMonth(yesterday.getDate())}`;
+    // 해당 날짜의 데이터 조회
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate());
+    const readDate = `${targetDate.getFullYear()}/${leftPadMonth(targetDate.getMonth() + 1)}/${leftPadMonth(targetDate.getDate())}`;
+    const s3Objects = await this.listObjects(bucketName, readDate);
 
     for (const s3Object of s3Objects) {
       const key = s3Object.Key;
 
       // 조건에 맞는 S3 파일인지 체크
-      if (key && key.includes(eveDate)) {
+      if (key && key.includes(readDate)) {
 
         // DB에 저장한 S3 파일인지 체크
         if (saveS3files.includes(key)) {
