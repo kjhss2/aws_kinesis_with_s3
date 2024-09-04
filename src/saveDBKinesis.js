@@ -83,10 +83,17 @@ class SaveDBKinesis {
         } else {
           const objectData = await this.getObject(bucketName, key);
           const rowDatas = objectData.split("\n");
-          for (const rowData of rowDatas) {
-            const data = JSON.parse(rowData);
-            await databaseClient.insertData(data);
-          }
+
+          // Mysql 1건씩 Insert
+          // for (const rowData of rowDatas) {
+          //   const data = JSON.parse(rowData);
+          //   await databaseClient.insertData(data);
+          // }
+
+          // Mysql 배치 Insert
+          const tableName = JSON.parse(rowDatas?.[0])?.msg?.tableName;
+          await databaseClient.insertDataBatch(rowDatas, tableName);
+
           // DB에 저장한 S3 파일 목록 추가
           saveS3files.push(key);
         }

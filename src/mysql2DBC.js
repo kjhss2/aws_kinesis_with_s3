@@ -31,13 +31,13 @@ class MySQL2DBC {
     }
   }
 
-  async getDatas(table_name) {
-    const dataModel = new DataModel(this.pool, table_name);
+  async insertDataBatch(records, tableName) {
+    const dataModel = new DataModel(this.pool, tableName);
 
     try {
       // Add a new Data
-      const datas = await dataModel.getAllDatas();
-      console.log('@getDatas', datas);
+      const result = await dataModel.insertDataBatch(records);
+      console.log('New Batch Data added : ', result);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -56,15 +56,15 @@ class MySQL2DBC {
   }
 
   // Method to execute queries
-  async query(sql, params) {
-    try {
-      const [rows, fields] = await this.pool.execute(sql, params);
-      return rows;
-    } catch (error) {
-      console.error('Error executing query:', error);
-      throw error;
-    }
-  }
+  // async query(sql, params) {
+  //   try {
+  //     const [rows, fields] = await this.pool.execute(sql, params);
+  //     return rows;
+  //   } catch (error) {
+  //     console.error('Error executing query:', error);
+  //     throw error;
+  //   }
+  // }
 
   // Method to close the pool when done
   async close() {
@@ -83,12 +83,6 @@ class DataModel {
   constructor(pool, tableName) {
     this.pool = pool;
     this.tableName = tableName;
-  }
-
-  // Retrieve all datas from the database
-  async getAllDatas() {
-    const sql = `SELECT * FROM ${this.tableName}`;
-    return await this.pool.query(sql);
   }
 
   // Find a data by ID
@@ -114,6 +108,27 @@ class DataModel {
       console.error("InsertData Error : ", error);
     }
   }
+
+  // MySQL에 데이터를 배치로 삽입하는 함수
+  async insertDataBatch(records) {
+    // const connection = await mysql.createConnection(dbConfig);
+
+    // 데이터를 배치로 삽입하는 쿼리
+    const sql = `INSERT INTO ${this.tableName} (contentType, nowDate, base, msg) VALUES ?`;
+    const values = records.map(rowData => {
+      const record = JSON.parse(rowData);
+      return [record.contentType, record.nowDate, JSON.stringify(record.base), JSON.stringify(record.msg)]
+    });
+
+    try {
+      const [result] = await this.pool.query(sql, [values]);
+      console.log(`Inserted ${result.affectedRows} rows into MySQL`);
+      return result;
+    } catch (error) {
+      console.error('Error inserting into MySQL:', error);
+    }
+  }
+
 }
 
 module.exports = { MySQL2DBC };
