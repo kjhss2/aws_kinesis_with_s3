@@ -55,6 +55,43 @@ class MySQL2DBC {
     }
   }
 
+  async checkSaveS3File(s3Objects) {
+    // 중복 검사: 이미 처리된 파일은 건너뛰기
+    const unprocessedObjects = [];
+
+    if (s3Objects.length > 0) {
+      try {
+        for (const obj of s3Objects) {
+          const sql = `SELECT COUNT(*) as count FROM s3_files WHERE file_key = ?`;
+          const [rows] = await this.pool.query(sql, [obj.Key]);
+          if (rows[0].count === 0) {
+            unprocessedObjects.push(obj);
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    return unprocessedObjects;
+  }
+
+  async insertSaveS3File(s3Object) {
+    try {
+      const sql = `INSERT INTO s3_files (file_key, etag, file_size, last_modified) VALUES (?, ?, ?, ?)`;
+      const params = [
+        s3Object.Key,
+        s3Object.Etag,
+        s3Object.Size,
+        s3Object.LastModified
+      ]
+      const result = await this.pool.query(sql, params);
+      return result;
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
   // Method to execute queries
   // async query(sql, params) {
   //   try {
@@ -128,7 +165,6 @@ class DataModel {
       console.error('Error inserting into MySQL:', error);
     }
   }
-
 }
 
 module.exports = { MySQL2DBC };

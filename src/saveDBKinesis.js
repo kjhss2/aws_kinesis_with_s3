@@ -2,7 +2,6 @@ const { S3Client, GetObjectCommand, ListObjectsV2Command } = require("@aws-sdk/c
 const { leftPadMonth } = require("./commonFunction");
 
 let s3Client = null;
-const saveS3files = [];
 class SaveDBKinesis {
   constructor() {
     if (s3Client) {
@@ -83,35 +82,30 @@ class SaveDBKinesis {
 
     while (isTruncated) {
       try {
-        // AWS S3 file list
+        // Step 1 : Get AWS S3 file list
         const { s3Objects, isTruncated: newIsTruncated, nextContinuationToken } = await this.listObjects(continuationToken, bucketName, readDate);
 
-        // 페이지네이션 처리
-        isTruncated = newIsTruncated;
-        continuationToken = nextContinuationToken;
+        // Step 2 : 이미 DB에 Insert된 S3 파일인지 체크
+        const insertS3Objects = await databaseClient.checkSaveS3File(s3Objects);
+        if (Array.isArray(insertS3Objects)) {
+          // Mysql DB Insert
+          for (const s3Object of insertS3Objects) {
+            const key = s3Object.Key;
 
-        for (const s3Object of s3Objects) {
-          const key = s3Object.Key;
+            // Mysql 배치 Insert
+            const objectData = await this.getObject(bucketName, key);
+            const rowDatas = objectData.split("\n");
+            const tableName = JSON.parse(rowDatas?.[0])?.msg?.tableName;
+            await databaseClient.insertDataBatch(rowDatas, tableName);
 
-          // 조건에 맞는 S3 파일인지 체크
-          if (key && key.includes(readDate)) {
-
-            // DB에 저장한 S3 파일인지 체크
-            if (saveS3files.includes(key)) {
-              console.log("@이미 저장된 S3파일");
-            } else {
-              const objectData = await this.getObject(bucketName, key);
-              const rowDatas = objectData.split("\n");
-
-              // Mysql 배치 Insert
-              const tableName = JSON.parse(rowDatas?.[0])?.msg?.tableName;
-              await databaseClient.insertDataBatch(rowDatas, tableName);
-
-              // DB에 저장한 S3 파일 목록 추가
-              saveS3files.push(key);
-            }
+            // DB에 S3 file insert
+            await databaseClient.insertSaveS3File(s3Object);
           }
         }
+
+        // Step 3 :페이지네이션 처리
+        isTruncated = newIsTruncated;
+        continuationToken = nextContinuationToken;
 
       } catch (error) {
         console.error('Error processing batch:', error);
