@@ -20,20 +20,28 @@ class SaveDBKinesis {
     s3Client = this;
   }
 
-  async listObjects(bucket, prefixDate) {
+  async listObjects(continuationToken = null, bucket, prefixDate) {
     const params = {
       Bucket: bucket,
       Prefix: "logs/" + prefixDate + "/",
+      MaxKeys: process.env.AWS_S3_MAXKEYS_COUNT,
     };
 
-    const command = new ListObjectsV2Command(params);
+    if (continuationToken) {
+      params.ContinuationToken = continuationToken;
+    }
 
     try {
+      const command = new ListObjectsV2Command(params);
       const data = await this.instanse.send(command);
-      return data.Contents || [];
+      return {
+        s3Objects: data.Contents || [],
+        isTruncated: data.IsTruncated,
+        nextContinuationToken: data.NextContinuationToken,
+      }
     } catch (error) {
-      console.error("Error listing objects:", error);
-      return [];
+      console.error("Error listing s3Objects:", error);
+      throw error;
     }
   }
 
@@ -65,38 +73,49 @@ class SaveDBKinesis {
 
   async processAllObjects(databaseClient) {
     const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
+    let isTruncated = true;
+    let continuationToken = null;
+
     // 해당 날짜의 데이터 조회
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate());
     const readDate = `${targetDate.getFullYear()}/${leftPadMonth(targetDate.getMonth() + 1)}/${leftPadMonth(targetDate.getDate())}`;
-    const s3Objects = await this.listObjects(bucketName, readDate);
 
-    for (const s3Object of s3Objects) {
-      const key = s3Object.Key;
+    while (isTruncated) {
+      try {
+        // AWS S3 file list
+        const { s3Objects, isTruncated: newIsTruncated, nextContinuationToken } = await this.listObjects(continuationToken, bucketName, readDate);
 
-      // 조건에 맞는 S3 파일인지 체크
-      if (key && key.includes(readDate)) {
+        // 페이지네이션 처리
+        isTruncated = newIsTruncated;
+        continuationToken = nextContinuationToken;
 
-        // DB에 저장한 S3 파일인지 체크
-        if (saveS3files.includes(key)) {
-          console.log("@이미 저장된 S3파일");
-        } else {
-          const objectData = await this.getObject(bucketName, key);
-          const rowDatas = objectData.split("\n");
+        for (const s3Object of s3Objects) {
+          const key = s3Object.Key;
 
-          // Mysql 1건씩 Insert
-          // for (const rowData of rowDatas) {
-          //   const data = JSON.parse(rowData);
-          //   await databaseClient.insertData(data);
-          // }
+          // 조건에 맞는 S3 파일인지 체크
+          if (key && key.includes(readDate)) {
 
-          // Mysql 배치 Insert
-          const tableName = JSON.parse(rowDatas?.[0])?.msg?.tableName;
-          await databaseClient.insertDataBatch(rowDatas, tableName);
+            // DB에 저장한 S3 파일인지 체크
+            if (saveS3files.includes(key)) {
+              console.log("@이미 저장된 S3파일");
+            } else {
+              const objectData = await this.getObject(bucketName, key);
+              const rowDatas = objectData.split("\n");
 
-          // DB에 저장한 S3 파일 목록 추가
-          saveS3files.push(key);
+              // Mysql 배치 Insert
+              const tableName = JSON.parse(rowDatas?.[0])?.msg?.tableName;
+              await databaseClient.insertDataBatch(rowDatas, tableName);
+
+              // DB에 저장한 S3 파일 목록 추가
+              saveS3files.push(key);
+            }
+          }
         }
+
+      } catch (error) {
+        console.error('Error processing batch:', error);
+        break;  // 에러가 발생하면 반복 중단
       }
     }
   };
