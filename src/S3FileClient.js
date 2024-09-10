@@ -1,8 +1,8 @@
 const { S3Client, GetObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
-const { leftPadMonth } = require("./commonFunction");
+const { leftPadMonth } = require("./lib/commonFunction");
 
 let s3Client = null;
-class SaveDBKinesis {
+class S3FileClient {
   constructor() {
     if (s3Client) {
       return s3Client;
@@ -87,32 +87,37 @@ class SaveDBKinesis {
 
         // Step 2 : 이미 DB에 Insert된 S3 파일인지 체크
         const insertS3Objects = await databaseClient.checkSaveS3File(s3Objects);
-        if (Array.isArray(insertS3Objects)) {
-          // Mysql DB Insert
-          for (const s3Object of insertS3Objects) {
-            const key = s3Object.Key;
 
-            // Mysql 배치 Insert
-            const objectData = await this.getObject(bucketName, key);
-            const rowDatas = objectData.split("\n");
-            const tableName = JSON.parse(rowDatas?.[0])?.msg?.tableName;
-            await databaseClient.insertDataBatch(rowDatas, tableName);
-
-            // DB에 S3 file insert
-            await databaseClient.insertSaveS3File(s3Object);
-          }
-        }
-
-        // Step 3 :페이지네이션 처리
+        // Step 3 : 페이지네이션 처리
         isTruncated = newIsTruncated;
         continuationToken = nextContinuationToken;
 
+        // Step 4 : DB Insert
+        if (Array.isArray(insertS3Objects)) {
+          // Mysql DB Insert
+          for (const s3Object of insertS3Objects) {
+            try {
+              const key = s3Object.Key;
+
+              // Mysql 배치 Insert
+              const objectData = await this.getObject(bucketName, key);
+              const rowDatas = objectData.split("\n");
+              const tableName = JSON.parse(rowDatas?.[0])?.tableName;
+              await databaseClient.insertDataBatch(rowDatas, tableName);
+
+              // DB에 S3 file insert
+              await databaseClient.insertSaveS3File(s3Object);
+
+            } catch (error) {
+              console.error('Error insert batch:', error);
+            }
+          }
+        }
       } catch (error) {
         console.error('Error processing batch:', error);
-        break;  // 에러가 발생하면 반복 중단
       }
     }
   };
 }
 
-module.exports = SaveDBKinesis;
+module.exports = S3FileClient;

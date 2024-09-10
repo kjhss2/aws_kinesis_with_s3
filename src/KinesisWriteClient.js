@@ -1,7 +1,7 @@
 const { KinesisClient, PutRecordCommand } = require("@aws-sdk/client-kinesis");
 
 let kinesisInstance;
-class KinesisClientClass {
+class KinesisWriteClient {
   constructor() {
     if (kinesisInstance) {
       return kinesisInstance;
@@ -18,7 +18,7 @@ class KinesisClientClass {
     kinesisInstance = this;
   }
 
-  // Kinesis Put
+  // Write Kinesis Data
   async writeKinesis(msgData) {
     try {
       const record = JSON.stringify(msgData);
@@ -35,4 +35,4 @@ class KinesisClientClass {
   }
 }
 
-module.exports = KinesisClientClass;
+module.exports = KinesisWriteClient;

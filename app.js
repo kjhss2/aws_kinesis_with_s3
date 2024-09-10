@@ -1,8 +1,8 @@
 const http = require('http');
 const schedule = require('node-schedule');
-const KinesisClientClass = require('./src/kinesis-client');
-const SaveDBKinesis = require('./src/saveDBKinesis');
-const { MySQL2DBC } = require('./src/mysql2DBC');
+const KinesisWriteClient = require('./src/KinesisWriteClient');
+const S3FileClient = require('./src/S3FileClient');
+const { MySQL2DBC } = require('./src/sql/Mysql2DBC');
 
 const result = require('dotenv').config({ path: __dirname + `/default.env` });
 if (result.error) {
@@ -18,7 +18,7 @@ http.createServer((request, response) => {
 
 // Write Kinesis : 더미 데이터 Write(0 0/1 * * * * 10분 마다)
 const writeKinesisJob = schedule.scheduleJob('0 0/10 * * * *', function () {
-  const kinesisClientClass = new KinesisClientClass();
+  const kinesisWriteClient = new KinesisWriteClient();
 
   // Test Input Data
   const msgDatas = [
@@ -43,18 +43,18 @@ const writeKinesisJob = schedule.scheduleJob('0 0/10 * * * *', function () {
   ];
 
   msgDatas.forEach(data => {
-    kinesisClientClass.writeKinesis(data);
+    kinesisWriteClient.writeKinesis(data);
   });
 })
 
 // Run Save MySQL 스케쥴 : 매일 오전 1시에 실행(0 0/1 * * * * 1분 마다)
-const saveMysqlJob = schedule.scheduleJob('0 0 1 * * *', async () => {
+const saveMysqlJob = schedule.scheduleJob('0 0/1 * * * *', async () => {
   let databaseClient = null;
 
   try {
     databaseClient = new MySQL2DBC();
-    const saveDBKinesis = new SaveDBKinesis();
-    await saveDBKinesis.processAllObjects(databaseClient);
+    const s3FileClient = new S3FileClient();
+    await s3FileClient.processAllObjects(databaseClient);
   } catch (error) {
     console.error('Job Error:', error);
   } finally {
