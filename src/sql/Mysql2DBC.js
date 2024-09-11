@@ -26,7 +26,7 @@ class MySQL2DBC {
     const dataModel = this.getDataModel(tableName);
     if (dataModel) {
       // Add a new Data
-      await dataModel.insertDataBatch(records);
+      return await dataModel.insertDataBatch(records);
     }
   }
 

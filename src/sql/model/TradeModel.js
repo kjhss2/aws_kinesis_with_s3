@@ -31,7 +31,6 @@ class TradeModel {
     });
 
     const [result] = await this.pool.query(sql, [values]);
-    console.log(`Inserted ${this.tableName} ${result.affectedRows} rows into MySQL`);
     return result;
   }
 }

@@ -74,6 +74,7 @@ class S3FileClient {
     const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
     let isTruncated = true;
     let continuationToken = null;
+    let insertDBCount = 0;
 
     // 해당 날짜의 데이터 조회
     const targetDate = new Date();
@@ -106,7 +107,8 @@ class S3FileClient {
               const objectData = await this.getObject(bucketName, key);
               const rowDatas = objectData.split("\n");
               const tableName = JSON.parse(rowDatas?.[0])?.tableName;
-              await databaseClient.insertDataBatch(rowDatas, tableName);
+              const result = await databaseClient.insertDataBatch(rowDatas, tableName);
+              insertDBCount += result?.affectedRows || 0;
 
               // DB에 S3 file insert
               await databaseClient.insertSaveS3File(s3Object);
@@ -118,6 +120,7 @@ class S3FileClient {
 
           // 속도 측정(End)
           console.timeEnd("Mysql Insert Job");
+          console.log('@insertDBCount = ', insertDBCount)
         }
       } catch (error) {
         console.error('Error processing batch:', error);
