@@ -1,4 +1,5 @@
-const { roundTo } = require("round-to");
+const uuid = require('uuid');
+const MersenneTwister = require('mersenne-twister');
 
 const U = module.exports;
 
@@ -10,7 +11,13 @@ U.leftPadMonth = function (value) {
   return `0${value}`;
 }
 
-U.getRandomI = function (min, max) {
+const generator = new MersenneTwister();
+generator.init_seed(Date.now());
+U.random = function () {
+  return generator.random();
+}
+
+U.getRandomI = function (min = 1, max = 10000) {
 
   if (min == null || min == undefined) throw new Error('getRandomI: invalid number');
 
@@ -28,6 +35,11 @@ U.getRandomI = function (min, max) {
   return Math.floor(U.random() * (max - min + 1)) + min;
 }
 
+U.createUUID = function () {
+  return uuid.v4();
+}
+
+/*
 U.Elapsed2RoundedElapsed = function (elapsed) {
   // locust ???;
   // to avoid to much data that has to be transfered to the master node when
@@ -44,3 +56,4 @@ U.Elapsed2RoundedElapsed = function (elapsed) {
 
   return roundTo(elapsed, -3);
 }
+*/

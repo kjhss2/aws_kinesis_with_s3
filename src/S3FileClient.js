@@ -93,7 +93,10 @@ class S3FileClient {
         continuationToken = nextContinuationToken;
 
         // Step 4 : DB Insert
-        if (Array.isArray(insertS3Objects)) {
+        if (Array.isArray(insertS3Objects) && insertS3Objects.length > 0) {
+          // 속도 측정(Start)
+          console.time("Mysql Insert Job");
+
           // Mysql DB Insert
           for (const s3Object of insertS3Objects) {
             try {
@@ -112,6 +115,9 @@ class S3FileClient {
               console.error('Error insert batch:', error);
             }
           }
+
+          // 속도 측정(End)
+          console.timeEnd("Mysql Insert Job");
         }
       } catch (error) {
         console.error('Error processing batch:', error);

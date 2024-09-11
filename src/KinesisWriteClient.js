@@ -24,11 +24,10 @@ class KinesisWriteClient {
       const record = JSON.stringify(msgData);
       const recordParams = {
         StreamName: process.env.KINESIS__STREAM_NAME,
-        PartitionKey: msgData.contentType,
+        PartitionKey: msgData.tableName,
         Data: Buffer.from(record),
       };
       const data = await this.instance.send(new PutRecordCommand(recordParams));
-      console.log("Successfully sent record to Kinesis:");
     } catch (err) {
       console.error("Error sending record to Kinesis:", err);
     }

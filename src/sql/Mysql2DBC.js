@@ -26,8 +26,7 @@ class MySQL2DBC {
     const dataModel = this.getDataModel(tableName);
     if (dataModel) {
       // Add a new Data
-      const result = await dataModel.insertDataBatch(records);
-      console.log('New Batch Data added : ', result);
+      await dataModel.insertDataBatch(records);
     }
   }
 
@@ -83,7 +82,6 @@ class MySQL2DBC {
     try {
       await this.pool.end();
       database = null;
-      console.log('@pool close');
     } catch (error) {
       console.error('Error closing the database connection:', error);
     }
