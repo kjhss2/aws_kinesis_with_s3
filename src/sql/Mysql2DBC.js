@@ -66,17 +66,6 @@ class MySQL2DBC {
     return result;
   }
 
-  // Method to execute queries
-  // async query(sql, params) {
-  //   try {
-  //     const [rows, fields] = await this.pool.execute(sql, params);
-  //     return rows;
-  //   } catch (error) {
-  //     console.error('Error executing query:', error);
-  //     throw error;
-  //   }
-  // }
-
   // Method to close the pool when done
   async close() {
     try {

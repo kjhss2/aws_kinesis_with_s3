@@ -36,8 +36,16 @@ class TradeModel {
         ]
       })
 
-      const [result] = await this.pool.query(sql, [values]);
-      insertCount += result.affectedRows;
+      // 연결 풀에서 연결 가져오기
+      const connection = await this.pool.getConnection();
+
+      try {
+        const [result] = await connection.query(sql, [values]);
+        insertCount += result.affectedRows;
+      } finally {
+        // 연결 반환
+        connection.release();
+      }
     }
 
     return insertCount;

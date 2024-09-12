@@ -45,7 +45,7 @@ const saveMysqlJob = schedule.scheduleJob('0 0/1 * * * *', async () => {
       console.error('Job Error:', error);
     } finally {
       if (databaseClient) {
-        await databaseClient.close();
+        // await databaseClient.close();
       }
     }
   }

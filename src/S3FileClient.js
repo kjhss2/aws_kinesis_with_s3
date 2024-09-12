@@ -17,6 +17,16 @@ class S3FileClient {
       }
     });
     s3Client = this;
+    // 내부 변수
+    this._isRunnigProcess = false;
+  }
+
+  isRunnigProces() {
+    return this._isRunnigProcess;
+  }
+
+  setRunnigProces(value) {
+    return this._isRunnigProcess = value;
   }
 
   async listObjects(continuationToken = null, bucket, prefixDate) {
@@ -71,6 +81,14 @@ class S3FileClient {
   }
 
   async processAllObjects(databaseClient) {
+
+    // 이미 프로세스가 진행 중 이라면 진행 하지 않음
+    if (this.isRunnigProces() === true) {
+      console.log("@이미 프로세스가 진행중이므로 진행 하지 않음");
+      return;
+    }
+
+    this.setRunnigProces(true);
     const bucketName = process.env.KINESIS__S3_BUCKET_NAME;
     let isTruncated = true;
     let continuationToken = null;
@@ -126,6 +144,9 @@ class S3FileClient {
         console.error('Error processing batch:', error);
       }
     }
+
+    // 실행중 상태 업데이트
+    this.setRunnigProces(false);
   };
 }
 
