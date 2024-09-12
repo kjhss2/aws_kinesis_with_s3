@@ -7,8 +7,9 @@ const PUT_DATA_COUNT = 100000;
 
 const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
 
-    let sendDataCount = PUT_DATA_COUNT;
     const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
 
     while (sendDataCount > 0) {
         sendDataCount--;
@@ -21,14 +22,17 @@ const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
             isNewUser: false,
             isReturningUser: false,
         };
-        await kinesisWriteClient.writeKinesis(msgData);
+        msgDatas.push(msgData);
     }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
 const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
 
-    let sendDataCount = PUT_DATA_COUNT;
     const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
 
     while (sendDataCount > 0) {
         sendDataCount--;
@@ -41,14 +45,17 @@ const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
             isNewUser: false,
             isReturningUser: false,
         };
-        await kinesisWriteClient.writeKinesis(msgData);
+        msgDatas.push(msgData);
     }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
 const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
 
-    let sendDataCount = PUT_DATA_COUNT;
     const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
 
     while (sendDataCount > 0) {
         sendDataCount--;
@@ -63,14 +70,17 @@ const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
             paymentValue: getRandomI(),
             quantity: getRandomI(),
         };
-        await kinesisWriteClient.writeKinesis(msgData);
+        msgDatas.push(msgData);
     }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
 const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
 
-    let sendDataCount = PUT_DATA_COUNT;
     const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
 
     while (sendDataCount > 0) {
         sendDataCount--;
@@ -86,14 +96,17 @@ const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
             paymentValue: getRandomI(),
             quantity: getRandomI(),
         };
-        await kinesisWriteClient.writeKinesis(msgData);
+        msgDatas.push(msgData);
     }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
 const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
 
-    let sendDataCount = PUT_DATA_COUNT;
     const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
 
     while (sendDataCount > 0) {
         sendDataCount--;
@@ -110,14 +123,17 @@ const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
             paymentValue: getRandomI(),
             quantity: getRandomI(),
         };
-        await kinesisWriteClient.writeKinesis(msgData);
+        msgDatas.push(msgData);
     }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
 const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
 
-    let sendDataCount = PUT_DATA_COUNT;
     const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
 
     while (sendDataCount > 0) {
         sendDataCount--;
@@ -135,8 +151,10 @@ const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
             paymentValue: getRandomI(),
             quantity: getRandomI(),
         };
-        await kinesisWriteClient.writeKinesis(msgData);
+        msgDatas.push(msgData);
     }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
 module.exports = {

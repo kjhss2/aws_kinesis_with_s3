@@ -1,4 +1,4 @@
-const { KinesisClient, PutRecordCommand } = require("@aws-sdk/client-kinesis");
+const { KinesisClient, PutRecordCommand, PutRecordsCommand } = require("@aws-sdk/client-kinesis");
 
 let kinesisInstance;
 class KinesisWriteClient {
@@ -27,9 +27,37 @@ class KinesisWriteClient {
         PartitionKey: msgData.tableName,
         Data: Buffer.from(record),
       };
-      const data = await this.instance.send(new PutRecordCommand(recordParams));
+      const response = await this.instance.send(new PutRecordCommand(recordParams));
     } catch (err) {
       console.error("Error sending record to Kinesis:", err);
+    }
+  }
+
+  async batchWriteKinesis(msgDatas) {
+    const BATCH_SIZE = 500; // 한번에 보낼 수 있는 최대 레코드 수
+    const batches = [];
+
+    // 500개씩 배치로 나누기
+    for (let i = 0; i < msgDatas.length; i += BATCH_SIZE) {
+      batches.push(msgDatas.slice(i, i + BATCH_SIZE));
+    }
+
+    for (const batch of batches) {
+      const recordParams = {
+        StreamName: process.env.KINESIS__STREAM_NAME,
+        Records: batch.map((record) => {
+          return {
+            PartitionKey: record.tableName,
+            Data: Buffer.from(JSON.stringify(record)),
+          }
+        })
+      };
+
+      try {
+        const response = await this.instance.send(new PutRecordsCommand(recordParams));
+      } catch (err) {
+        console.error("Error sending batch to Kinesis:", err);
+      }
     }
   }
 }
