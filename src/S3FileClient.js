@@ -107,8 +107,8 @@ class S3FileClient {
               const objectData = await this.getObject(bucketName, key);
               const rowDatas = objectData.split("\n");
               const tableName = JSON.parse(rowDatas?.[0])?.tableName;
-              const result = await databaseClient.insertDataBatch(rowDatas, tableName);
-              insertDBCount += result?.affectedRows || 0;
+              const affectedRows = await databaseClient.insertDataBatch(rowDatas, tableName);
+              insertDBCount += affectedRows || 0;
 
               // DB에 S3 file insert
               await databaseClient.insertSaveS3File(s3Object);

@@ -12,26 +12,35 @@ class TradeModel {
   }
 
   // MySQL에 데이터를 배치로 삽입하는 함수
-  async insertDataBatch(records) {
+  async insertDataBatch(records, batchSize = 1000) {
+
+    let insertCount = 0;
+
     // 데이터를 배치로 삽입하는 쿼리
     const sql = `INSERT INTO ${this.tableName} (date, contentType, registerUserId, buyUserId, itemId, paymentType, price, paymentValue, quantity) VALUES ?`;
-    const values = records.map(rowData => {
-      const record = JSON.parse(rowData);
-      return [
-        record.date,
-        record.contentType,
-        record.registerUserId,
-        record.buyUserId,
-        record.itemId,
-        record.paymentType,
-        record.price,
-        record.paymentValue,
-        record.quantity,
-      ]
-    });
 
-    const [result] = await this.pool.query(sql, [values]);
-    return result;
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      const values = batch.map(rowData => {
+        const record = JSON.parse(rowData);
+        return [
+          record.date,
+          record.contentType,
+          record.registerUserId,
+          record.buyUserId,
+          record.itemId,
+          record.paymentType,
+          record.price,
+          record.paymentValue,
+          record.quantity,
+        ]
+      })
+
+      const [result] = await this.pool.query(sql, [values]);
+      insertCount += result.affectedRows;
+    }
+
+    return insertCount;
   }
 }
 
