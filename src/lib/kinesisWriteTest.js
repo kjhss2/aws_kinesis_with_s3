@@ -5,7 +5,7 @@ const { createUUID, getRandomI } = require("./commonFunction");
 // 더미 데이터 생성 개수
 const PUT_DATA_COUNT = 100000;
 
-const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
+const makeDummyLoginData = async (tableName = "de_login_action") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -28,7 +28,7 @@ const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
+const makeDummyLogoutData = async (tableName = "de_login_action") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -51,7 +51,7 @@ const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
+const makeDummyShopBuyData = async (tableName = "de_shop_action") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -64,6 +64,7 @@ const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
             tableName,
             date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
             contentType: 'BUY_SHOP_ITEM',
+            tableIndex: getRandomI(),
             userId: createUUID(),
             goodsIndex: getRandomI(),
             paymentType: 'By_Gold',
@@ -76,7 +77,7 @@ const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
+const makeDummyShopSellData = async (tableName = "de_shop_action") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -102,7 +103,7 @@ const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
+const makeDummyTradeRegisterData = async (tableName = "de_trade_action") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -129,7 +130,7 @@ const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
+const makeDummyTradeBuyData = async (tableName = "de_trade_action") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;

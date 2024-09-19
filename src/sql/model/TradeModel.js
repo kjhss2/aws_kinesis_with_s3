@@ -17,7 +17,7 @@ class TradeModel {
     let insertCount = 0;
 
     // 데이터를 배치로 삽입하는 쿼리
-    const sql = `INSERT INTO ${this.tableName} (date, contentType, registerUserId, buyUserId, itemId, paymentType, price, paymentValue, quantity) VALUES ?`;
+    const sql = `INSERT INTO ${this.tableName} (date, contentType, registerUserId, buyUserId, tableIndex, itemId, paymentType, price, paymentValue, quantity) VALUES ?`;
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
@@ -28,6 +28,7 @@ class TradeModel {
           record.contentType,
           record.registerUserId,
           record.buyUserId,
+          record.tableIndex,
           record.itemId,
           record.paymentType,
           record.price,
