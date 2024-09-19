@@ -32,7 +32,7 @@ class S3FileClient {
   async listObjects(continuationToken = null, bucket, prefixDate) {
     const params = {
       Bucket: bucket,
-      Prefix: "logs/" + prefixDate + "/",
+      Prefix: process.env.NAMESPACE + "/logs/" + prefixDate + "/",
       MaxKeys: process.env.AWS_S3_MAXKEYS_COUNT,
     };
 

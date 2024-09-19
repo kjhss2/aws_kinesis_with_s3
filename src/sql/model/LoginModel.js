@@ -32,7 +32,7 @@ class LoginModel {
     let insertCount = 0;
 
     // 데이터를 배치로 삽입하는 쿼리
-    const sql = `INSERT INTO ${this.tableName} (date, contentType, userId, isNewUser, isReturningUser) VALUES ?`;
+    const sql = `INSERT INTO ${this.tableName} (date, contentType, userId, ip, isNewUser, isReturningUser) VALUES ?`;
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
@@ -42,6 +42,7 @@ class LoginModel {
           record.date,
           record.contentType,
           record.userId,
+          record.ip,
           record.isNewUser,
           record.isReturningUser
         ]

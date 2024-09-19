@@ -1,8 +1,8 @@
 const http = require('http');
 const schedule = require('node-schedule');
 const S3FileClient = require('./src/S3FileClient');
-const { MySQL2DBC } = require('./src/sql/Mysql2DBC');
 const kinesisWriteTest = require('./src/lib/kinesisWriteTest');
+const { MySQL2DBC } = require('./src/sql/mysql2DBC');
 
 const result = require('dotenv').config({ path: __dirname + `/default.env` });
 if (result.error) {
