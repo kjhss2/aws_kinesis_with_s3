@@ -76,17 +76,18 @@ class MySQL2DBC {
     }
   }
 
-  getDataModel = (tableName) => {
+  getDataModel = (tableName = '') => {
     let dataModel = null;
-    switch (tableName) {
-      case "DE_LOGIN_ACTION":
-        dataModel = new LoginModel(this.pool, tableName);
+    const tName = tableName.toLowerCase();
+    switch (tName) {
+      case "de_login_action":
+        dataModel = new LoginModel(this.pool, tName);
         break;
-      case "DE_SHOP_ACTION":
-        dataModel = new ShopModel(this.pool, tableName);
+      case "de_shop_action":
+        dataModel = new ShopModel(this.pool, tName);
         break;
-      case "DE_TRADE_ACTION":
-        dataModel = new TradeModel(this.pool, tableName);
+      case "de_trade_action":
+        dataModel = new TradeModel(this.pool, tName);
         break;
 
       default:
