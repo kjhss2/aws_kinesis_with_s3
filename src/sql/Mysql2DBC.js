@@ -2,6 +2,7 @@ const mysql = require('mysql2/promise');
 const { LoginModel } = require('./model/LoginModel');
 const { TradeModel } = require('./model/TradeModel');
 const { ShopModel } = require('./model/ShopModel');
+const { ItemModel } = require('./model/ItemModel');
 
 let database = null;
 class MySQL2DBC {
@@ -88,6 +89,9 @@ class MySQL2DBC {
         break;
       case "de_trade_action":
         dataModel = new TradeModel(this.pool, tName);
+        break;
+      case "de_item_action":
+        dataModel = new ItemModel(this.pool, tName);
         break;
 
       default:

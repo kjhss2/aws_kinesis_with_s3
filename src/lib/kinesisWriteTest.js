@@ -158,11 +158,66 @@ const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
+const makeDummyUpgradeItemData = async (tableName = "DE_ITEM_ACTION") => {
+
+    const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
+
+    while (sendDataCount > 0) {
+        sendDataCount--;
+        const nowDate = Date.now();
+        const delta = getRandomI(0, 1);
+        const msgData = {
+            tableName,
+            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
+            contentType: 'UPGRADE_ITEM',
+            userId: createUUID(),
+            tableIndex: getRandomI(),
+            itemId: createUUID(),
+            delta: delta,
+            before: '',
+            after: '',
+        };
+        msgDatas.push(msgData);
+    }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
+}
+
+const makeDummyRerollItemData = async (tableName = "DE_ITEM_ACTION") => {
+
+    const kinesisWriteClient = new KinesisWriteClient();
+    let sendDataCount = PUT_DATA_COUNT;
+    const msgDatas = [];
+
+    while (sendDataCount > 0) {
+        sendDataCount--;
+        const nowDate = Date.now();
+        const msgData = {
+            tableName,
+            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
+            contentType: 'REROLL_ITEM',
+            userId: createUUID(),
+            tableIndex: getRandomI(),
+            itemId: createUUID(),
+            delta: delta,
+            before: '',
+            after: '',
+        };
+        msgDatas.push(msgData);
+    }
+
+    await kinesisWriteClient.batchWriteKinesis(msgDatas);
+}
+
 module.exports = {
     makeDummyLoginData,
     makeDummyLogoutData,
     makeDummyShopBuyData,
     makeDummyShopSellData,
     makeDummyTradeRegisterData,
-    makeDummyTradeBuyData
+    makeDummyTradeBuyData,
+    makeDummyUpgradeItemData,
+    makeDummyRerollItemData
 };

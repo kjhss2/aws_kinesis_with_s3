@@ -27,6 +27,8 @@ const writeDummyKinesisJob = schedule.scheduleJob('0 0/1 * * * *', function () {
     kinesisWriteTest.makeDummyShopSellData();
     kinesisWriteTest.makeDummyTradeRegisterData();
     kinesisWriteTest.makeDummyTradeBuyData();
+    kinesisWriteTest.makeDummyUpgradeItemData();
+    kinesisWriteTest.makeDummyRerollItemData();
     // 속도 측정(End)
     console.timeEnd("writeDummyKinesisJob");
   }
