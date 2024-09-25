@@ -194,6 +194,7 @@ const makeDummyRerollItemData = async (tableName = "DE_ITEM_ACTION") => {
     while (sendDataCount > 0) {
         sendDataCount--;
         const nowDate = Date.now();
+        const delta = getRandomI(0, 1);
         const msgData = {
             tableName,
             date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
