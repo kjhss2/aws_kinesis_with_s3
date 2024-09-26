@@ -19,6 +19,7 @@ const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
             date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
             contentType: 'LOGIN',
             userId: createUUID(),
+            ip: '127.0.0.1',
             isNewUser: false,
             isReturningUser: false,
         };
@@ -42,6 +43,7 @@ const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
             date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
             contentType: 'LOGOUT',
             userId: createUUID(),
+            ip: '127.0.0.1',
             isNewUser: false,
             isReturningUser: false,
         };
