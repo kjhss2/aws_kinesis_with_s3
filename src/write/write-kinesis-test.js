@@ -1,11 +1,26 @@
-const dateFormat = require('dateformat');
-const KinesisWriteClient = require("../KinesisWriteClient");
-const { createUUID, getRandomI } = require("./commonFunction");
+const KinesisWriteClient = require("./write-kinesis-client");
+const { createUUID, getRandomI } = require("../lib/commonFunction");
+const Enum = require('enum');
 
 // 더미 데이터 생성 개수
 const PUT_DATA_COUNT = 100000;
 
-const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
+const StlogType = new Enum({
+    // STLOG_LOGIN_ACTION
+    LOGIN: 0,
+    LOGOUT: 1,
+    // STLOG_SHOP_ACTION
+    BUY_SHOP_ITEM: 0,
+    SELL_SHOP_ITEM: 1,
+    // STLOG_TRADE_ACTION
+    REGISTER_TRADE_ITEM: 0,
+    BUY_TRADE_ITEM: 1,
+    // STLOG_ITEM_ACTION
+    UPGRADE_ITEM: 0,
+    REROLL_ITEM: 1,
+});
+
+const makeDummyLoginData = async (tableName = "STLOG_LOGIN_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -13,15 +28,12 @@ const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'LOGIN',
+            logType: StlogType.LOGIN.value,
             userId: createUUID(),
             ip: '127.0.0.1',
             isNewUser: false,
-            isReturningUser: false,
         };
         msgDatas.push(msgData);
     }
@@ -29,7 +41,7 @@ const makeDummyLoginData = async (tableName = "DE_LOGIN_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
+const makeDummyLogoutData = async (tableName = "STLOG_LOGIN_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -37,15 +49,12 @@ const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'LOGOUT',
+            logType: StlogType.LOGOUT.value,
             userId: createUUID(),
             ip: '127.0.0.1',
             isNewUser: false,
-            isReturningUser: false,
         };
         msgDatas.push(msgData);
     }
@@ -53,7 +62,7 @@ const makeDummyLogoutData = async (tableName = "DE_LOGIN_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
+const makeDummyShopBuyData = async (tableName = "STLOG_SHOP_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -61,15 +70,13 @@ const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'BUY_SHOP_ITEM',
+            logType: StlogType.BUY_SHOP_ITEM.value,
             tableIndex: getRandomI(),
             userId: createUUID(),
             goodsIndex: getRandomI(),
-            paymentType: 'By_Gold',
+            paymentType: '1',
             paymentValue: getRandomI(),
             quantity: getRandomI(),
         };
@@ -79,7 +86,7 @@ const makeDummyShopBuyData = async (tableName = "DE_SHOP_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
+const makeDummyShopSellData = async (tableName = "STLOG_SHOP_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -87,15 +94,13 @@ const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'SELL_SHOP_ITEM',
+            logType: StlogType.SELL_SHOP_ITEM.value,
             userId: createUUID(),
             itemId: createUUID(),
             tableIndex: getRandomI(),
-            paymentType: 'By_Gold',
+            paymentType: '1',
             paymentValue: getRandomI(),
             quantity: getRandomI(),
         };
@@ -105,7 +110,7 @@ const makeDummyShopSellData = async (tableName = "DE_SHOP_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
+const makeDummyTradeRegisterData = async (tableName = "STLOG_TRADE_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -113,15 +118,13 @@ const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'REGISTER_TRADE_ITEM',
+            logType: StlogType.REGISTER_TRADE_ITEM.value,
             registerUserId: createUUID(),
             tableIndex: getRandomI(),
             itemId: createUUID(),
-            paymentType: 'By_Gold',
+            paymentType: '1',
             price: getRandomI(),
             paymentValue: getRandomI(),
             quantity: getRandomI(),
@@ -132,7 +135,7 @@ const makeDummyTradeRegisterData = async (tableName = "DE_TRADE_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
+const makeDummyTradeBuyData = async (tableName = "STLOG_TRADE_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -140,16 +143,14 @@ const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'BUY_TRADE_ITEM',
+            logType: StlogType.BUY_TRADE_ITEM.value,
             registerUserId: createUUID(),
             buyUserId: createUUID(),
             tableIndex: getRandomI(),
             itemId: createUUID(),
-            paymentType: 'By_Gold',
+            paymentType: '1',
             price: getRandomI(),
             paymentValue: getRandomI(),
             quantity: getRandomI(),
@@ -160,7 +161,7 @@ const makeDummyTradeBuyData = async (tableName = "DE_TRADE_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyUpgradeItemData = async (tableName = "DE_ITEM_ACTION") => {
+const makeDummyUpgradeItemData = async (tableName = "STLOG_ITEM_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -168,12 +169,10 @@ const makeDummyUpgradeItemData = async (tableName = "DE_ITEM_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const delta = getRandomI(0, 1);
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'UPGRADE_ITEM',
+            logType: StlogType.UPGRADE_ITEM.value,
             userId: createUUID(),
             tableIndex: getRandomI(),
             itemId: createUUID(),
@@ -187,7 +186,7 @@ const makeDummyUpgradeItemData = async (tableName = "DE_ITEM_ACTION") => {
     await kinesisWriteClient.batchWriteKinesis(msgDatas);
 }
 
-const makeDummyRerollItemData = async (tableName = "DE_ITEM_ACTION") => {
+const makeDummyRerollItemData = async (tableName = "STLOG_ITEM_ACTION") => {
 
     const kinesisWriteClient = new KinesisWriteClient();
     let sendDataCount = PUT_DATA_COUNT;
@@ -195,12 +194,10 @@ const makeDummyRerollItemData = async (tableName = "DE_ITEM_ACTION") => {
 
     while (sendDataCount > 0) {
         sendDataCount--;
-        const nowDate = Date.now();
         const delta = getRandomI(0, 1);
         const msgData = {
             tableName,
-            date: dateFormat(nowDate, "UTC:yyyy-mm-dd HH:MM:ss"),
-            contentType: 'REROLL_ITEM',
+            logType: StlogType.REROLL_ITEM.value,
             userId: createUUID(),
             tableIndex: getRandomI(),
             itemId: createUUID(),

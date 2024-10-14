@@ -1,7 +1,7 @@
 'use strict'
 
 const fetch = require('node-fetch');
-const { Elapsed2RoundedElapsed } = require('./commonFunction');
+const { Elapsed2RoundedElapsed } = require('../lib/commonFunction');
 
 const SqlQueryMetric = (function () {
   let queries = {};

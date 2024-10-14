@@ -1,39 +1,29 @@
-class TradeModel {
+class ItemModel {
   constructor(pool, tableName) {
     this.pool = pool;
     this.tableName = tableName;
   }
 
-  // Find a data by ID
-  async findDataById(id) {
-    const sql = `SELECT * FROM ${this.tableName} WHERE id = ?`;
-    const users = await this.pool.query(sql, [id]);
-    return users[0] || null;
-  }
-
   // MySQL에 데이터를 배치로 삽입하는 함수
   async insertDataBatch(records, batchSize = 1000) {
-
     let insertCount = 0;
 
     // 데이터를 배치로 삽입하는 쿼리
-    const sql = `INSERT INTO ${this.tableName} (date, contentType, registerUserId, buyUserId, tableIndex, itemId, paymentType, price, paymentValue, quantity) VALUES ?`;
+    const sql = `INSERT INTO ${this.tableName} (date, log_type, user_id, table_index, item_id, delta) VALUES ?`;
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
       const values = batch.map(rowData => {
         const record = JSON.parse(rowData);
+        // const before = JSON.parse(record.before);
+        // const after = JSON.parse(record.after);
         return [
           record.date,
-          record.contentType,
-          record.registerUserId,
-          record.buyUserId,
+          record.logType,
+          record.userId,
           record.tableIndex,
           record.itemId,
-          record.paymentType,
-          record.price,
-          record.paymentValue,
-          record.quantity,
+          record.delta,
         ]
       })
 
@@ -53,4 +43,4 @@ class TradeModel {
   }
 }
 
-module.exports = { TradeModel };
+module.exports = { ItemModel };

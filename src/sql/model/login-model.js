@@ -13,14 +13,14 @@ class LoginModel {
 
   // Add a new data
   async insertData(record) {
-    const sql = `INSERT INTO ${this.tableName} (date, contentType, userId, isNewUser, isReturningUser) 
-        VALUES (?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO ${this.tableName} (date, log_type, user_id, ip, is_new_user) 
+        VALUES (?, ?, ?, ?)`;
     const params = [
       record.date,
-      record.contentType,
+      record.logType,
       record.userId,
+      record.ip,
       record.isNewUser,
-      record.isReturningUser,
     ]
     const result = await this.pool.query(sql, params);
     return result;
@@ -32,7 +32,7 @@ class LoginModel {
     let insertCount = 0;
 
     // 데이터를 배치로 삽입하는 쿼리
-    const sql = `INSERT INTO ${this.tableName} (date, contentType, userId, ip, isNewUser, isReturningUser) VALUES ?`;
+    const sql = `INSERT INTO ${this.tableName} (date, log_type, user_id, ip, is_new_user) VALUES ?`;
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
@@ -40,11 +40,10 @@ class LoginModel {
         const record = JSON.parse(rowData);
         return [
           record.date,
-          record.contentType,
+          record.logType,
           record.userId,
           record.ip,
           record.isNewUser,
-          record.isReturningUser
         ]
       })
 

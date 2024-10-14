@@ -17,7 +17,7 @@ class ShopModel {
     let insertCount = 0;
 
     // 데이터를 배치로 삽입하는 쿼리
-    const sql = `INSERT INTO ${this.tableName} (date, contentType, goodsIndex, tableIndex, userId, itemId, paymentType, paymentValue, quantity) VALUES ?`;
+    const sql = `INSERT INTO ${this.tableName} (date, log_type, goods_index, table_index, user_id, item_id, payment_type, payment_value, quantity) VALUES ?`;
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
@@ -25,7 +25,7 @@ class ShopModel {
         const record = JSON.parse(rowData);
         return [
           record.date,
-          record.contentType,
+          record.logType,
           record.goodsIndex,
           record.tableIndex,
           record.userId,

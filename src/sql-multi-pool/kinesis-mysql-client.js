@@ -3,17 +3,16 @@
 // Packages
 //----------------------------------------------------------------------------------------------------
 const SqlClient = require('./sql-client');
-// const redisData = require('../redis/redis_data');
-// const logger = require('../../common/logger');
 
 const KinesisSqlClient = (function () {
 
   const connectionConfigs = [];
   if (process.env.OPSTOOL__MYSQL_CONNECTION_INFO != undefined) {
     const connectionInfos = JSON.parse(process.env.OPSTOOL__MYSQL_CONNECTION_INFO);
-    for (let c of connectionInfos) {
-      let connectionLimit = parseInt(process.env.OPSTOOL__MYSQL_CONNECTION_POOLSIZE);
-      let weight = (c.weight != undefined) ? c.weight : 10;
+
+    for (const c of connectionInfos) {
+      const connectionLimit = parseInt(process.env.OPSTOOL__MYSQL_CONNECTION_POOLSIZE);
+      const weight = (c.weight != undefined) ? c.weight : 10;
       if (c.replicaCount != undefined && c.replicaCount > 1) {
         connectionLimit *= c.replicaCount;
       }

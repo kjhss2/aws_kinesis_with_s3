@@ -1,9 +1,8 @@
 'use strict';
 
 // const sqlQueryMetric = require('./sql-query-metric');
-// const logger = require('../logger');
 const mysql = require('mysql2/promise');
-const { getRandomI } = require('./commonFunction');
+const { getRandomI } = require('../lib/commonFunction');
 
 const SqlClient = function (connectionConfigs) {
   this.connectionConfigs = connectionConfigs;
@@ -22,7 +21,6 @@ SqlClient.prototype.initialize = function () {
 
     this.pools = {};
     this.poolWeights = [];
-    // this.pools.totalWeight = 0;
 
     if (this.connectionConfigs.length == 0) {
       throw new Error('[sql] connection info empty');
